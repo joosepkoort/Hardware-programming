@@ -19,5 +19,7 @@ int main (void)
     fprintf(stderr, "avr-libc version: %s\n", __AVR_LIBC_VERSION_STRING__);
     /*End UART3 init and info print */
     print_ascii_tbl(stderr);
+    const unsigned char test[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    print_for_human(stderr, test, 10);
 }
 
