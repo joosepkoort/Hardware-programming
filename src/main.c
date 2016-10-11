@@ -7,16 +7,12 @@
 #include "print_helper.h"
 #include "hmi_msg.h"
 #include <string.h>
-#define BLINK_DELAY_MS 200
+#define BLINK_DELAY_MS 100
 #include "../lib/hd44780_111/hd44780.h"
 #include <avr/pgmspace.h>
 
 
-#define CONSOLE_START "console started"
-//#define VER_LIBC "avr version: " __AVR_LIBC_VERSION_STRING__"\n"
-//#define VER_FW "Version: " GIT_DESCR "Date" __DATE__ "Time" __TIME__
 
-//#define VER_FW ("Version %s", GIT_DESCR )
 
 
 int main (void)
@@ -30,63 +26,69 @@ int main (void)
     uart0_init();
     stdout = &uart0_io;
     stdin = &uart0_io;
+    /*init lcd and print student name*/
     lcd_init();
     lcd_clrscr();
-    lcd_puts(STUD_NAME);
-    //
+    lcd_puts_P(STUD_NAME);
+    fprintf_P(stdout, VER_FW, __AVR_LIBC_VERSION_STRING__);
     fprintf_P(stdout, VER_LIBC,  GIT_DESCR, __DATE__, __TIME__);
-    fprintf_P(stdout,VER_FW, __AVR_LIBC_VERSION_STRING__);
     /*PRINT STUDENT NAME */
     fprintf_P(stdout, STUD_NAME);
-    print_ascii_tbl(stdout);
+    fprintf_P(stdout, PSTR("'\n'"));
     //LAB03.1 print ASCII maps to CLI
-    unsigned char test2 [128] = {0};
+    print_ascii_tbl(stdout);
+    unsigned char asciitabel [128] = {0};
 
     for (unsigned char i = 0; i < 128; i++) {
-        test2[i] = i;
+        asciitabel[i] = i;
     }
 
-    print_for_human(stdout, test2, 128);
-    char inBuf = 0;
-    //init lcd and display student name
+    print_for_human(stdout, asciitabel, 128);
 
     while (1) {
         //set blinK LED ON
         PORTA |= _BV(PORTA3);
         _delay_ms(BLINK_DELAY_MS);
         //ask user to input first letter of month name
-        fprintf(stdout, tervitustekst);
+        char inBuf = 0;
+        fprintf_P(stdout, tervitustekst);
         fscanf(stdin,    "%c",    &inBuf);
         fprintf(stdout,    "%c\n",    inBuf);
         //try to find month beginning with letter from list
+        //vaste staatuse nö boolean. 1 = pole olemas. 2 = olemas
+        int x = 1;
 
         for    (int    i    =    0;    i    <    6;    i++)    {
-            if    (!strncmp(&inBuf,    kuud[i],    1))    {
+            if (!strncmp_P(&inBuf,    kuud[i],    1))    {
+                x = 0;
                 //kui leiab vaste siis:
                 //prindib konsooli
-                fprintf(stdout,    "%s\n",    kuud[i]);
+                fprintf_P(stdout, kuud[i]);
+                //KIRJUTAB \N
+                fputc('\n', stdout);
                 //ja LCD teisele reale
+                //viga seisnes antud ülesandes selles, et kui leiti mitu kuud, prinditi need üksteisest üle.
+                //üks võimalus oleks eraldada kuud ja minna käsuga lcd_goto(0x46) nt teise rea keskele, et kirjutada teine väärtus esimese taha.
+                //mina olen aga printinud kuud samma kohta väikese vahega.
                 lcd_goto(0x40);
-                lcd_puts("              ");
+                //tühik on vajalik kustutamiseks esimene väärtus
+                lcd_puts_P(PSTR("               "));
                 lcd_goto(0x40);
-                lcd_puts(kuud[i]);
-  
-
-
-            
-
-            
-            } else if  (strncmp(&inBuf,    kuud[i],    1)) {
-                //teeb LCD teise rea tühjaks
-                //
-                lcd_goto(0x40);
-                lcd_puts("               ");
+                lcd_puts_P(kuud[i]);
             }
 
-            //lülitab LEDi välja
-            PORTA &= ~_BV(PORTA3);
+            //kui
+            if (x != 0) {
+                //teeb teise rea tühjaks kui ei leia vastet
+                lcd_goto(0x40);
+                lcd_puts_P(PSTR("               "));
+            }
+
+         
             _delay_ms(BLINK_DELAY_MS);
         }
+        //lülitab LEDi välja, siis kui rohkem iteratsioone pole. Praegusel juhul while (1) ei lõppe ära
+        PORTA &= ~_BV(PORTA3);
     }
 }
 
