@@ -30,11 +30,12 @@ int main (void)
     /*init lcd and print student name*/
     lcd_init();
     lcd_clrscr();
-    lcd_puts_P(STUD_NAME);
-    fprintf_P(stderr, VER_FW,  GIT_DESCR, __DATE__, __TIME__);
-    fprintf_P(stderr, VER_LIBC, __AVR_LIBC_VERSION_STRING__);
+    lcd_puts_P(PSTR(STUD_NAME));
+    fprintf_P(stderr, PSTR(VER_FW), PSTR(GIT_DESCR), PSTR(__DATE__),
+              PSTR(__TIME__));
+    fprintf_P(stderr, PSTR(VER_LIBC), PSTR(__AVR_LIBC_VERSION_STRING__));
     /*PRINT STUDENT NAME */
-    fprintf_P(stdout, (PGM_P)pgm_read_word(STUD_NAME));
+    fprintf_P(stdout, PSTR(STUD_NAME));
     fprintf_P(stdout, PSTR("'\n'"));
     //LAB03.1 print ASCII maps to CLI
     print_ascii_tbl(stdout);
@@ -52,11 +53,11 @@ int main (void)
         _delay_ms(BLINK_DELAY_MS);
         //ask user to input first letter of month name
         char inBuf = 0;
-        fprintf_P(stdout, (PGM_P)pgm_read_word(tervitustekst));
+        fprintf_P(stdout, PSTR(tervitustekst));
         fscanf(stdin,    "%c",    &inBuf);
         fprintf(stdout,    "%c\n",    inBuf);
         //try to find month beginning with letter from list
-        //vaste staatuse nö boolean. 1 = pole olemas. 2 = olemas
+        //vaste staatuse nÃ¶ boolean. 1 = pole olemas. 2 = olemas
         int x = 1;
 
         for    (int    i    =    0;    i    <    6;    i++)    {
@@ -64,15 +65,15 @@ int main (void)
                 x = 0;
                 //kui leiab vaste siis:
                 //prindib konsooli
-                fprintf_P(stdout, (PGM_P)pgm_read_word(&kuud[i]));
+                fprintf_P(stdout, PSTR(tervitustekst));
                 //KIRJUTAB \N
                 fputc('\n', stdout);
                 //ja LCD teisele reale
                 //viga seisnes antud ülesandes selles, et kui leiti mitu kuud, prinditi need üksteisest üle.
-                //üks võimalus oleks eraldada kuud ja minna käsuga lcd_goto(0x46) nt teise rea keskele, et kirjutada teine väärtus esimese taha.
+                //Ã¼ks võimalus oleks eraldada kuud ja minna kÃ¤suga lcd_goto(0x46) nt teise rea keskele, et kirjutada teine väärtus esimese taha.
                 //mina olen aga printinud kuud samma kohta väikese vahega.
                 lcd_goto(0x40);
-                //tühik on vajalik kustutamiseks esimene väärtus
+                //tÃ¼hik on vajalik kustutamiseks esimene väärtus
                 lcd_puts_P(PSTR("               "));
                 lcd_goto(0x40);
                 lcd_puts_P((PGM_P)pgm_read_word(&kuud[i]));
@@ -90,10 +91,11 @@ int main (void)
             _delay_ms(BLINK_DELAY_MS);
         }
 
-        //lülitab LEDi välja, siis kui rohkem iteratsioone pole. Praegusel juhul while (1) ei lõppe ära
+        //Lülitab ledi välja, siis kui rohkem iteratsioone pole. Praegusel juhul while (1) ei lõppe ära
         PORTA &= ~_BV(HEARTBEAT_LED);
         _delay_ms(BLINK_DELAY_MS);
     }
 }
+
 
 

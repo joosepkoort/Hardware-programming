@@ -4,19 +4,22 @@
 #define ERROR_LED PORTA1
 #define HEARTBEAT_LED PORTA3
 #define emptyLCDline "               "
+#define STUD_NAME "Joosep Koort"
+#define tervitustekst "Enter Month name first letter >"
+#define VER_FW "Version: %S built on: %S %S\n"
+#define VER_LIBC "avr-libc version: %S\n"
 
-const char  PROGMEM  VER_FW[] = "Version: %s built on: %s %s\n";
-const char  PROGMEM  VER_LIBC[] = "avr-libc version: %s\n";
-const char  PROGMEM  STUD_NAME[] = "Joosep Koort";
-const char  PROGMEM  tervitustekst[] = "Enter Month name first letter >";
 
-const char PROGMEM  j1[]   = "January";
-const char PROGMEM  f[]   = "February";
-const char PROGMEM  m1[]  = "March";
-const char PROGMEM  a[]   = "April";
-const char PROGMEM  m2[]  = "May";
-const char PROGMEM  j2[]   = "June";
+const char january[]  PROGMEM = "January";
+const char february[] PROGMEM = "February";
+const char march[]    PROGMEM = "March";
+const char april[]    PROGMEM = "April";
+const char may[]      PROGMEM = "May";
+const char june[]     PROGMEM = "June";
 
-PGM_P const kuud[] PROGMEM = {j1,f,m1,a,m2,j2};
+PGM_P const kuud[] PROGMEM = {january,february,march,april,may,june};
+
+
 #endif /* _HMI_MSG_H */
+
 
