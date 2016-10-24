@@ -11,10 +11,6 @@
 #include "../lib/hd44780_111/hd44780.h"
 #include <avr/pgmspace.h>
 
-
-
-
-
 int main (void)
 {
     /*SAMM1 set pin 3 of PORTA for output*/
@@ -30,8 +26,8 @@ int main (void)
     lcd_init();
     lcd_clrscr();
     lcd_puts_P(STUD_NAME);
-    fprintf_P(stdout, VER_FW, __AVR_LIBC_VERSION_STRING__);
-    fprintf_P(stdout, VER_LIBC,  GIT_DESCR, __DATE__, __TIME__);
+    fprintf_P(stderr, VER_FW,  GIT_DESCR, __DATE__, __TIME__);
+    fprintf_P(stderr, VER_LIBC, __AVR_LIBC_VERSION_STRING__);
     /*PRINT STUDENT NAME */
     fprintf_P(stdout, STUD_NAME);
     fprintf_P(stdout, PSTR("'\n'"));
@@ -47,7 +43,7 @@ int main (void)
 
     while (1) {
         //set blinK LED ON
-        PORTA |= _BV(PORTA3);
+        PORTA |= _BV(HEARTBEAT_LED);
         _delay_ms(BLINK_DELAY_MS);
         //ask user to input first letter of month name
         char inBuf = 0;
@@ -84,11 +80,13 @@ int main (void)
                 lcd_puts_P(PSTR("               "));
             }
 
-         
-            _delay_ms(BLINK_DELAY_MS);
+            
         }
+
         //lülitab LEDi välja, siis kui rohkem iteratsioone pole. Praegusel juhul while (1) ei lõppe ära
-        PORTA &= ~_BV(PORTA3);
+
+        PORTA &= ~_BV(HEARTBEAT_LED);
+       _delay_ms(BLINK_DELAY_MS);
     }
 }
 
