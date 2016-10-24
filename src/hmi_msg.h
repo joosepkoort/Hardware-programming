@@ -1,6 +1,5 @@
 #ifndef _HMI_MSG_H_
 #define _HMI_MSG_H_
-#include <avr/pgmspace.h>
 
 #define ERROR_LED PORTA1
 #define HEARTBEAT_LED PORTA3
