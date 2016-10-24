@@ -80,13 +80,14 @@ int main (void)
                 lcd_puts_P(PSTR("               "));
             }
 
-            
+            //ootab natuke, enne teise kuu printimist
+            _delay_ms(BLINK_DELAY_MS);
+            _delay_ms(BLINK_DELAY_MS);
         }
 
         //lülitab LEDi välja, siis kui rohkem iteratsioone pole. Praegusel juhul while (1) ei lõppe ära
-
         PORTA &= ~_BV(HEARTBEAT_LED);
-       _delay_ms(BLINK_DELAY_MS);
+        _delay_ms(BLINK_DELAY_MS);
     }
 }
 
