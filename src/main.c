@@ -34,7 +34,7 @@ int main (void)
     fprintf_P(stderr, VER_FW,  GIT_DESCR, __DATE__, __TIME__);
     fprintf_P(stderr, VER_LIBC, __AVR_LIBC_VERSION_STRING__);
     /*PRINT STUDENT NAME */
-    fprintf_P(stdout, STUD_NAME);
+    fprintf_P(stdout, (PGM_P)pgm_read_word(STUD_NAME));
     fprintf_P(stdout, PSTR("'\n'"));
     //LAB03.1 print ASCII maps to CLI
     print_ascii_tbl(stdout);
@@ -52,7 +52,7 @@ int main (void)
         _delay_ms(BLINK_DELAY_MS);
         //ask user to input first letter of month name
         char inBuf = 0;
-        fprintf_P(stdout, tervitustekst);
+        fprintf_P(stdout, (PGM_P)pgm_read_word(tervitustekst));
         fscanf(stdin,    "%c",    &inBuf);
         fprintf(stdout,    "%c\n",    inBuf);
         //try to find month beginning with letter from list
@@ -60,11 +60,11 @@ int main (void)
         int x = 1;
 
         for    (int    i    =    0;    i    <    6;    i++)    {
-            if (!strncmp_P(&inBuf,    kuud[i],    1))    {
+            if (!strncmp_P(&inBuf,    (PGM_P)pgm_read_word(&kuud[i]),    1))    {
                 x = 0;
                 //kui leiab vaste siis:
                 //prindib konsooli
-                fprintf_P(stdout, kuud[i]);
+                fprintf_P(stdout, (PGM_P)pgm_read_word(&kuud[i]));
                 //KIRJUTAB \N
                 fputc('\n', stdout);
                 //ja LCD teisele reale
@@ -75,7 +75,7 @@ int main (void)
                 //tühik on vajalik kustutamiseks esimene väärtus
                 lcd_puts_P(PSTR("               "));
                 lcd_goto(0x40);
-                lcd_puts_P(kuud[i]);
+                lcd_puts_P((PGM_P)pgm_read_word(&kuud[i]));
             }
 
             //kui
