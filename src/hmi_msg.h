@@ -9,16 +9,14 @@
 #define VER_FW "Version: %S built on: %S %S\n"
 #define VER_LIBC "avr-libc version: %S\n"
 
-
-const char january[]  PROGMEM = "January";
+const char january[] PROGMEM = "January";
 const char february[] PROGMEM = "February";
-const char march[]    PROGMEM = "March";
-const char april[]    PROGMEM = "April";
-const char may[]      PROGMEM = "May";
-const char june[]     PROGMEM = "June";
+const char march[] PROGMEM = "March";
+const char april[] PROGMEM = "April";
+const char may[] PROGMEM = "May";
+const char june[] PROGMEM = "June";
 
 PGM_P const kuud[] PROGMEM = {january,february,march,april,may,june};
-
 
 #endif /* _HMI_MSG_H */
 
