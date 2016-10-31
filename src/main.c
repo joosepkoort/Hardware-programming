@@ -26,9 +26,8 @@ int main (void)
     lcd_init();
     lcd_clrscr();
     lcd_puts_P(PSTR(STUD_NAME));
-    fprintf_P(stderr, PSTR(VER_FW), PSTR(GIT_DESCR), PSTR(__DATE__),
-              PSTR(__TIME__));
-    fprintf_P(stderr, PSTR(VER_LIBC), PSTR(__AVR_LIBC_VERSION_STRING__));
+    fprintf_P(stderr, PSTR(VER_FW1  GIT_DESCR VER_FW2 __DATE__ " " __TIME__ "\n"));
+    fprintf_P(stderr, PSTR(VER_LIBC __AVR_LIBC_VERSION_STRING__ "\n"));
     //prindib õpilase nime
     fprintf_P(stdout, PSTR(STUD_NAME));
     fprintf_P(stdout, PSTR("\n"));
@@ -50,7 +49,7 @@ int main (void)
         _delay_ms(BLINK_DELAY_MS);
         //ask user to input first letter of month name
         char inBuf = 0;
-        fprintf_P(stdout, PSTR(tervitustekst));
+        fprintf_P(stdout, PSTR(TERVITUSTEKST));
         fscanf(stdin, "%c", &inBuf);
         fprintf(stdout, "%c\n", inBuf);
 
@@ -65,7 +64,7 @@ int main (void)
 
                 //kontrollib, et kuvataks tervitusteksti ainult üks kord
                 if (x != 0) {
-                    fprintf_P(stdout, PSTR(tervitustekst));
+                    fprintf_P(stdout, PSTR(TERVITUSTEKST));
                 }
 
                 //ja lcd teisele reale
@@ -74,7 +73,7 @@ int main (void)
                 //mina olen aga printinud mõlemad kuud samma kohta väikese vahega.
                 lcd_goto(0x40);
                 //tühik on vajalik kustutamiseks esimene väärtus
-                lcd_puts_P(PSTR(emptyLCDline));
+                lcd_puts_P(PSTR(EMPTYLCDLINE));
                 lcd_goto(0x40);
                 lcd_puts_P((PGM_P)pgm_read_word(&kuud[i]));
             }
@@ -83,7 +82,7 @@ int main (void)
             if (x != 0) {
                 //teeb teise rea tühjaks kui ei leia vastet
                 lcd_goto(0x40);
-                lcd_puts_P(PSTR(emptyLCDline));
+                lcd_puts_P(PSTR(EMPTYLCDLINE));
             }
 
             //ootab natuke, enne teise kuu printimist

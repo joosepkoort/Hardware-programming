@@ -2,11 +2,12 @@
 #define _HMI_MSG_H_
 
 #define HEARTBEAT_LED   PORTA3
-#define emptyLCDline    "               "
+#define EMPTYLCDLINE    "               "
 #define STUD_NAME       "Joosep Koort"
-#define tervitustekst   "Enter Month name first letter >"
-#define VER_FW          "Version: %S built on: %S %S\n"
-#define VER_LIBC        "avr-libc version: %S\n"
+#define TERVITUSTEKST   "Enter Month name first letter >"
+#define VER_FW1         "Version: "
+#define VER_FW2         " built on: "
+#define VER_LIBC        "avr-libc version: "
 
 const char jan[] PROGMEM = "January";
 const char feb[] PROGMEM = "February";
