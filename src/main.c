@@ -2,38 +2,37 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#define __ASSERT_USE_STDERR
-#include <assert.h>
 #include "uart.h"
 #include "print_helper.h"
 #include "hmi_msg.h"
-#include <string.h>
-#define BLINK_DELAY_MS 100
 #include "../lib/hd44780_111/hd44780.h"
-#include <avr/pgmspace.h>
+#include <string.h>
+
+#define  BLINK_DELAY_MS 100
+
 
 int main (void)
 {
-    /* set pin 3 of PORTA for output*/
+    //pin3 PORTA väljund
     DDRA |= _BV(DDA3);
-    /* Init error console as stderr in UART3 and print libc info */
+    // Init veakonsooli UART3 and prindib libc info
     uart3_init();
     stderr = &uart3_out;
-    /* INIT CLI  (STDIN AND STDOUT) in urt0 and print student name*/
+    // init cli (stdin and stdout)
     uart0_init();
     stdout = &uart0_io;
     stdin = &uart0_io;
-    /*init lcd and print student name*/
+    //init lcd ja prindib õpilase nime
     lcd_init();
     lcd_clrscr();
     lcd_puts_P(PSTR(STUD_NAME));
     fprintf_P(stderr, PSTR(VER_FW), PSTR(GIT_DESCR), PSTR(__DATE__),
               PSTR(__TIME__));
     fprintf_P(stderr, PSTR(VER_LIBC), PSTR(__AVR_LIBC_VERSION_STRING__));
-    /*PRINT STUDENT NAME */
+    //prindib õpilase nime
     fprintf_P(stdout, PSTR(STUD_NAME));
     fprintf_P(stdout, PSTR("\n"));
-    //LAB03.1 print ASCII maps to CLI
+    //prindib lab03.1 ascii käsureale
     print_ascii_tbl(stdout);
     unsigned char asciitabel [128] = {0};
 
@@ -44,6 +43,7 @@ int main (void)
     print_for_human(stdout, asciitabel, 128);
 
     while (1) {
+        //vaste staatuse boolean. 1 = pole olemas. 0 = olemas
         int x = 1;
         //set blink led on
         PORTA |= _BV(HEARTBEAT_LED);
@@ -53,22 +53,22 @@ int main (void)
         fprintf_P(stdout, PSTR(tervitustekst));
         fscanf(stdin, "%c", &inBuf);
         fprintf(stdout, "%c\n", inBuf);
-        //try to find month beginning with letter from list
-        //vaste staatuse boolean. 1 võimalus = pole olemas. 2 võimalus = olemas
 
+        //üritab kuu nime leida
         for    (int i = 0; i < 6; i++) {
             if (!strncmp_P(&inBuf, (PGM_P)pgm_read_word(&kuud[i]), 1)) {
                 x = 0;
-
                 //kui leiab vaste, siis:
                 //prindib konsooli
+                fprintf_P(stdout, (PGM_P)pgm_read_word(&kuud[i]));
+                fputc('\n', stdout);
+
+                //kontrollib, et kuvataks tervitusteksti ainult üks kord
                 if (x != 0) {
                     fprintf_P(stdout, PSTR(tervitustekst));
-                    //läheb uuele reale
-                    fputc('\n', stdout);
                 }
 
-                //ja LCD teisele reale
+                //ja lcd teisele reale
                 //viga seisnes antud ülesandes selles, et kui leiti mitu kuud, prinditi need üksteisest üle.
                 //Üks võimalus oleks eraldada kuud ja minna käsuga lcd_goto(0x46) nt teise rea keskele, et kirjutada teine väärtus esimese taha.
                 //mina olen aga printinud mõlemad kuud samma kohta väikese vahega.
