@@ -9,7 +9,10 @@
 #include <string.h>
 
 #define  BLINK_DELAY_MS 100
+static inline void init_hw(void)
+{
 
+}
 
 int main (void)
 {

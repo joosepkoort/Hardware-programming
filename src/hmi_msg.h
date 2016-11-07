@@ -8,6 +8,7 @@
 #define VER_FW1         "Version: "
 #define VER_FW2         " built on: "
 #define VER_LIBC        "avr-libc version: "
+#define UPTIME          "Uptime: %lu s"
 
 const char jan[] PROGMEM = "January";
 const char feb[] PROGMEM = "February";
