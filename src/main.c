@@ -10,8 +10,8 @@
 #include "../lib/hd44780_111/hd44780.h"
 #include "../lib/andygock_avr-uart/uart.h"
 #include <util/atomic.h>
-#define UART_STATUS_MASK 0x00FF
 
+#define UART_STATUS_MASK 0x00FF
 #define BAUD 9600
 #define BLINK_DELAY_MS 100
 
@@ -22,8 +22,9 @@ static inline void clock(void)
     TCCR1A = 0;  //timer/counter 1 control register A
     TCCR1B = 0;  //timer/counter 1 control register B
     TCCR1B |= _BV(WGM12); // Turn on CTC (Clear Timer on Compare)
-    TCCR1B |= _BV(CS12); // fCPU/256
-    OCR1A = 62549; // Note that it is actually two registers OCR5AH and OCR5AL
+    TCCR1B |= _BV(
+                  CS12); // fCPU/256  CS12 1 second, cs11 faster, cs10 even more faster
+    OCR1A = 62549; //1 second
     TIMSK1 |= _BV(OCIE1A); // Output Compare A Match Interrupt Enable
 }
 
@@ -32,17 +33,18 @@ static inline void hw_init()
 {
     //pin3 PORTA väljund
     DDRA |= _BV(DDA3);
-    // Init veakonsooli UART3 and prindib libc info
+    // Init UART3
     uart3_init(UART_BAUD_SELECT(BAUD, F_CPU));
     stderr = &uart3_out;
-    // init cli (stdin and stdout)
+    // init UART0
     uart0_init(UART_BAUD_SELECT(BAUD, F_CPU));
     clock();
     sei();
     stdout = &uart0_io;
     stdin = &uart0_io;
-    //init lcd ja prindib õpilase nime
+    //init lcd
     lcd_init();
+    //clears lcd screen
     lcd_clrscr();
 }
 
@@ -57,8 +59,9 @@ static inline void print_startup()
     //PRINTS STUDENT NAME
     fprintf_P(stdout, PSTR(STUD_NAME));
     fprintf_P(stdout, PSTR("\n"));
+    lcd_home();
     lcd_puts_P(PSTR(STUD_NAME));
-    //PRINTS LAB03.1 ASCII
+    //PRINTS LAB03.1 ASCII TABLE
     print_ascii_tbl(stdout);
     unsigned char asciitable [128] = {0};
 
@@ -67,6 +70,7 @@ static inline void print_startup()
     }
 
     print_for_human(stdout, asciitable, 128);
+    //asks user for letter
     fprintf_P(stdout, PSTR(WELCOME_MONTH));
 }
 
@@ -77,30 +81,29 @@ static inline void search_month()
     char inBuf = 0;
     fscanf(stdin, "%c", &inBuf);
     fprintf(stdout, "%c\n", inBuf);
-    //TRIES TO FIND MONTHS
-    //GOES TO SECOND LCD ROW
+    //tries to find months
+    //goes to second lcd row
     lcd_goto(LCD2ROW);
-    
-    
-    
-        if (uart0_peek() != UART_NO_DATA) {   
-              inBuf = uart0_getc() & UART_STATUS_MASK;
-                 printf("%c\n", inBuf);  
-                    }
+
+    if (uart0_peek() != UART_NO_DATA) {
+        inBuf = uart0_getc() & UART_STATUS_MASK;
+        printf("%c\n", inBuf);
+    }
 
     for (int i = 0; i < 6; i++) {
         if (!strncmp_P(&inBuf, (PGM_P)pgm_read_word(&months[i]), 1)) {
             fprintf_P(stdout, (PGM_P)pgm_read_word(&months[i]));
+            //goes to next line
             fputc('\n', stdout);
             lcd_puts_P((PGM_P)pgm_read_word(&months[i]));
-            //PRINTS SPACE BETWEEN MONTHS ON LCD
+            //prints space between months on lcd
             lcd_putc(LCDSPACE);
         }
     }
 
-    //PRINTS WELCOME MESSAGE
+    //prints welcome message
     fprintf_P(stdout, PSTR(WELCOME_MONTH));
-    //PRINTS EMPTY LINE
+    //prints empty line
     lcd_puts_P(PSTR(EMPTYLCDLINE));
 }
 
@@ -120,7 +123,7 @@ static inline void heartbeat()
         previous_time = current_time;
     }
 }
-//MAIN METHOD
+//main method
 int main (void)
 {
     hw_init();
@@ -136,7 +139,7 @@ int main (void)
     }
 }
 
-//SYSTEM CLOCK
+//System clock
 ISR(TIMER1_COMPA_vect)
 {
     time++;

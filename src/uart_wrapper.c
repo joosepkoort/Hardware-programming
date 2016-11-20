@@ -3,14 +3,13 @@
 #include "uart_wrapper.h"
 #include "../lib/andygock_avr-uart/uart.h"
 
-#define UART_STATUS_MASK 0x00FF
+#define UART_STATUS_MASK 0x00FF //255
 
-FILE uart0_io = FDEV_SETUP_STREAM(uart0_putchar_w, uart0_getchar_w,
-                                  _FDEV_SETUP_RW);
-FILE uart3_out = FDEV_SETUP_STREAM(uart3_putchar_w, NULL, _FDEV_SETUP_WRITE);
+FILE uart0_io = FDEV_SETUP_STREAM(uart0_putchar, uart0_getchar, _FDEV_SETUP_RW);
+FILE uart3_out = FDEV_SETUP_STREAM(uart3_putchar, NULL, _FDEV_SETUP_WRITE);
 
 /* Character input for uart0 */
-int uart0_getchar_w(FILE *stream)
+int uart0_getchar(FILE *stream)
 {
     (void) stream;
 
@@ -21,7 +20,7 @@ int uart0_getchar_w(FILE *stream)
 }
 /* End character input for uart0 */
 /* Character output for uart0 */
-int uart0_putchar_w(char c, FILE *stream)
+int uart0_putchar(char c, FILE *stream)
 {
     (void) stream;
 
@@ -36,7 +35,7 @@ int uart0_putchar_w(char c, FILE *stream)
 }
 /* End character output for uart0 */
 /* Character output for uart3 */
-int uart3_putchar_w(char c, FILE *stream)
+int uart3_putchar(char c, FILE *stream)
 {
     (void) stream;
 
