@@ -2,7 +2,6 @@
 #ifndef _HMI_MSG_H_
 #define _HMI_MSG_H_
 
-#define HEARTBEAT_LED   PORTA3
 #define EMPTYLCDLINE    "               "
 #define STUD_NAME       "Joosep Koort"
 #define WELCOME_MONTH   "Enter Month name first letter >"

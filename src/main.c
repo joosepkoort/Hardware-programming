@@ -3,7 +3,6 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
 #include "hmi_msg.h"
 #include "uart_wrapper.h"
 #include "print_helper.h"
@@ -13,7 +12,6 @@
 
 #define UART_STATUS_MASK 0x00FF
 #define BAUD 9600
-#define BLINK_DELAY_MS 100
 
 volatile uint32_t time;
 
@@ -22,12 +20,10 @@ static inline void clock(void)
     TCCR1A = 0;  //timer/counter 1 control register A
     TCCR1B = 0;  //timer/counter 1 control register B
     TCCR1B |= _BV(WGM12); // Turn on CTC (Clear Timer on Compare)
-    TCCR1B |= _BV(
-                  CS12); // fCPU/256  CS12 1 second, cs11 faster, cs10 even more faster
+    TCCR1B |= _BV(CS12); // fCPU/256. cs11 faster, cs10 even more faster
     OCR1A = 62549; //1 second
     TIMSK1 |= _BV(OCIE1A); // Output Compare A Match Interrupt Enable
 }
-
 
 static inline void hw_init()
 {
@@ -56,12 +52,12 @@ static inline void print_version()
 
 static inline void print_startup()
 {
-    //PRINTS STUDENT NAME
+    //prints student name
     fprintf_P(stdout, PSTR(STUD_NAME));
     fprintf_P(stdout, PSTR("\n"));
     lcd_home();
     lcd_puts_P(PSTR(STUD_NAME));
-    //PRINTS LAB03.1 ASCII TABLE
+    //prints lab03.1 ascii table
     print_ascii_tbl(stdout);
     unsigned char asciitable [128] = {0};
 
@@ -73,7 +69,6 @@ static inline void print_startup()
     //asks user for letter
     fprintf_P(stdout, PSTR(WELCOME_MONTH));
 }
-
 
 static inline void search_month()
 {
@@ -106,8 +101,6 @@ static inline void search_month()
     //prints empty line
     lcd_puts_P(PSTR(EMPTYLCDLINE));
 }
-
-
 
 static inline void heartbeat()
 {
