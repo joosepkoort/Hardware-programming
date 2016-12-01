@@ -8,12 +8,17 @@
 #include "print_helper.h"
 #include "../lib/hd44780_111/hd44780.h"
 #include "../lib/andygock_avr-uart/uart.h"
+#include "../lib/helius_microrl/microrl.h"
+#include "cli_microrl.h"
 #include <util/atomic.h>
 
 #define UART_STATUS_MASK 0x00FF
 #define BAUD 9600
 
 volatile uint32_t time;
+//microrl object and pointer creation
+microrl_t rl;
+microrl_t *prl = &rl;
 
 static inline void clock(void)
 {
@@ -35,6 +40,7 @@ static inline void hw_init()
     // init UART0
     uart0_init(UART_BAUD_SELECT(BAUD, F_CPU));
     clock();
+    //interrupts
     sei();
     stdout = &uart0_io;
     stdin = &uart0_io;
@@ -42,6 +48,9 @@ static inline void hw_init()
     lcd_init();
     //clears lcd screen
     lcd_clrscr();
+    //init cli
+    microrl_init(prl, cli_print);
+    microrl_set_execute_callback (prl, cli_execute);
 }
 
 static inline void print_version()
@@ -52,55 +61,11 @@ static inline void print_version()
 
 static inline void print_startup()
 {
-    //prints student name
-    fprintf_P(stdout, PSTR(STUD_NAME));
     fprintf_P(stdout, PSTR("\n"));
     lcd_home();
     lcd_puts_P(PSTR(STUD_NAME));
-    //prints lab03.1 ascii table
-    print_ascii_tbl(stdout);
-    unsigned char asciitable [128] = {0};
-
-    for (unsigned char i = 0; i < 128; i++) {
-        asciitable[i] = i;
-    }
-
-    print_for_human(stdout, asciitable, 128);
-    //asks user for letter
-    fprintf_P(stdout, PSTR(WELCOME_MONTH));
 }
 
-static inline void search_month()
-{
-    //ask user to input first letter of month name
-    char inBuf = 0;
-    fscanf(stdin, "%c", &inBuf);
-    fprintf(stdout, "%c\n", inBuf);
-    //tries to find months
-    //goes to second lcd row
-    lcd_goto(LCD2ROW);
-
-    if (uart0_peek() != UART_NO_DATA) {
-        inBuf = uart0_getc() & UART_STATUS_MASK;
-        printf("%c\n", inBuf);
-    }
-
-    for (int i = 0; i < 6; i++) {
-        if (!strncmp_P(&inBuf, (PGM_P)pgm_read_word(&months[i]), 1)) {
-            fprintf_P(stdout, (PGM_P)pgm_read_word(&months[i]));
-            //goes to next line
-            fputc('\n', stdout);
-            lcd_puts_P((PGM_P)pgm_read_word(&months[i]));
-            //prints space between months on lcd
-            lcd_putc(LCDSPACE);
-        }
-    }
-
-    //prints welcome message
-    fprintf_P(stdout, PSTR(WELCOME_MONTH));
-    //prints empty line
-    lcd_puts_P(PSTR(EMPTYLCDLINE));
-}
 
 static inline void heartbeat()
 {
@@ -120,15 +85,12 @@ static inline void heartbeat()
 int main (void)
 {
     hw_init();
-    print_version();
     print_startup();
+    print_version();
 
     while (1) {
         heartbeat();
-
-        if (uart0_available()) {
-            search_month();
-        }
+        microrl_insert_char(prl, (uart0_getc() & UART_STATUS_MASK));
     }
 }
 
