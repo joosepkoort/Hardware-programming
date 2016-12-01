@@ -44,6 +44,9 @@ static inline void hw_init()
     sei();
     stdout = &uart0_io;
     stdin = &uart0_io;
+    fprintf_P(stdout,
+              PSTR("Use backspace to delete entry and enter to confirm.\n\r"));
+    fprintf_P(stdout, PSTR("Arrow key's and del do not work currently.\n\r"));
     //init lcd
     lcd_init();
     //clears lcd screen
@@ -61,7 +64,6 @@ static inline void print_version()
 
 static inline void print_startup()
 {
-    fprintf_P(stdout, PSTR("\n"));
     lcd_home();
     lcd_puts_P(PSTR(STUD_NAME));
 }
