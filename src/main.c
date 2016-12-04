@@ -30,6 +30,7 @@ static inline void clock(void)
     TIMSK1 |= _BV(OCIE1A); // Output Compare A Match Interrupt Enable
 }
 
+
 static inline void hw_init()
 {
     //pin3 PORTA väljund
@@ -45,8 +46,8 @@ static inline void hw_init()
     stdout = &uart0_io;
     stdin = &uart0_io;
     fprintf_P(stdout,
-              PSTR("Use backspace to delete entry and enter to confirm.\n\r"));
-    fprintf_P(stdout, PSTR("Arrow key's and del do not work currently.\n\r"));
+              PSTR(CONSOLE_HELP1));
+    fprintf_P(stdout, PSTR(CONSOLE_HELP2));
     //init lcd
     lcd_init();
     //clears lcd screen
@@ -56,11 +57,14 @@ static inline void hw_init()
     microrl_set_execute_callback (prl, cli_execute);
 }
 
+
 static inline void print_version()
 {
-    fprintf_P(stderr, PSTR(VER_FW1  GIT_DESCR VER_FW2 __DATE__ " " __TIME__ "\n"));
-    fprintf_P(stderr, PSTR(VER_LIBC __AVR_LIBC_VERSION_STRING__ "\n"));
+    fprintf_P(stderr, PSTR(VER_FW1 GIT_DESCR VER_FW2 __DATE__ " " __TIME__ "\n"));
+    fprintf_P(stderr, PSTR(VER_LIBC __AVR_LIBC_VERSION_STRING__ " " VER_GCC
+                           __VERSION__ "\n"));
 }
+
 
 static inline void print_startup()
 {
@@ -83,6 +87,7 @@ static inline void heartbeat()
         previous_time = current_time;
     }
 }
+
 //main method
 int main (void)
 {

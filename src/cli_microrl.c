@@ -23,13 +23,13 @@ typedef struct cli_cmd {
     const uint8_t func_argc;
 } cli_cmd_t;
 
-const char help_cmd[] PROGMEM = "help";
-const char help_help[] PROGMEM = "Get help";
-const char ver_cmd[] PROGMEM = "version";
-const char ver_help[] PROGMEM = "Print FW version";
-const char ascii_cmd[] PROGMEM = "ascii";
+const char help_cmd[]   PROGMEM = "help";
+const char help_help[]  PROGMEM = "Get help";
+const char ver_cmd[]    PROGMEM = "version";
+const char ver_help[]   PROGMEM = "Print FW version";
+const char ascii_cmd[]  PROGMEM = "ascii";
 const char ascii_help[] PROGMEM = "print ASCII tables";
-const char month_cmd[] PROGMEM = "month";
+const char month_cmd[]  PROGMEM = "month";
 const char month_help[] PROGMEM =
     "Find month by it's first character. Usage: month <character>";
 
@@ -40,16 +40,18 @@ const cli_cmd_t cli_cmds[] = {
     {month_cmd, month_help, cli_handle_month, 1}
 };
 
+
 void cli_print(const char * str)
 {
     fprintf(stdout, "%s", str);
 }
 
+
 void cli_print_help(const char *const *argv)
 {
     (void) argv;
     printf_P(PSTR("\n"));
-    printf_P(PSTR("Implemented commands:\n"));
+    printf_P(PSTR(CON_CMD_IMPL));
 
     for (uint8_t i = 0; i < NUM_ELEMS(cli_cmds); i++) {
         printf_P(cli_cmds[i].cmd);
@@ -59,12 +61,14 @@ void cli_print_help(const char *const *argv)
     }
 }
 
+
 void cli_print_ver(const char *const *argv)
 {
     (void)argv;
     printf_P(PSTR("\n"));
-    printf_P(PSTR(VER_FW1  GIT_DESCR VER_FW2 __DATE__ " " __TIME__ "\n"));
-    printf_P(PSTR(VER_LIBC __AVR_LIBC_VERSION_STRING__ "\n"));
+    printf_P(PSTR(VER_FW1 GIT_DESCR VER_FW2 __DATE__ " " __TIME__ "\n"));
+    printf_P(PSTR(VER_LIBC __AVR_LIBC_VERSION_STRING__ " " VER_GCC __VERSION__
+                  "\n"));
 }
 
 /* Print ascii table */
@@ -84,40 +88,34 @@ void cli_print_ascii_tbls(const char *const *argv)
 /* Scan and print months and display name of month on LCD second row */
 void cli_handle_month(const char *const *argv)
 {
-    char outbuf[20] = "";
-    lcd_clrscr();
-    lcd_puts_P(PSTR(STUD_NAME));
-    lcd_goto(0x40);
-    int len;
+    (void) argv;
+    printf("\n\r");
+    lcd_clr(LCD2ROW, 16);
+    lcd_goto(LCD2ROW);
 
-    for (len = 0; argv[1][len] != '\0'; len++);
-
-    for (unsigned int i = 0; i < 6; i++) {
-        strcpy_P(outbuf, (PGM_P)pgm_read_word(&(months[i])));
-
-        if (strncmp(argv[1], outbuf, len) == 0) {
-            lcd_puts(outbuf);
-            lcd_puts(" ");
-            printf("\n");
-            printf(outbuf);
+    for (int i = 0; i < 6; i++) {
+        if (!strncmp_P(argv[1], (PGM_P)pgm_read_word(&months[i]),
+                       strlen(argv[1]))) {
+            fprintf_P(stdout, (PGM_P)pgm_read_word(&months[i]));
+            printf("\n\r");
+            lcd_puts_P((PGM_P)pgm_read_word(&months[i]));
+            lcd_goto(0x48);
         }
     }
-
-    printf("\n");
 }
 /* End scan and print months and display name of month on LCD second row */
 /*  */
 void cli_print_cmd_error(void)
 {
     printf_P(PSTR("\n"));
-    printf_P(PSTR("Command not implemented.\n Use <help> to get help.\n"));
+    printf_P(PSTR(CON_IMPLEMENTED));
 }
 /*  */
 /*  */
 void cli_print_cmd_arg_error(void)
 {
     printf_P(PSTR("\n"));
-    printf_P(PSTR("To few or to many arguments for this command\nUse <help>\n"));
+    printf_P(PSTR(CON_ARGUMENTS));
 }
 /*  */
 /* Execute callback */
