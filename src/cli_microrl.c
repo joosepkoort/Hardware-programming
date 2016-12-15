@@ -43,7 +43,8 @@ const char month_help[] PROGMEM =
 const char read_cmd[] PROGMEM = "read";
 const char read_help[] PROGMEM = "Read UID from RFID card";
 const char add_cmd[] PROGMEM = "add";
-const char add_help[] PROGMEM = "Add card to memory by name (card needs to be in contact)";
+const char add_help[] PROGMEM =
+    "Add card to memory by name (card needs to be in contact)";
 const char remove_cmd[] PROGMEM = "remove";
 const char remove_help[] PROGMEM = "Remove card from memory by name";
 const char list_cmd[] PROGMEM = "list";
@@ -72,18 +73,18 @@ void read_card(void)
     Uid uid;
     Uid *uid_ptr = &uid;
     printf_P(PSTR("\n"));
-    
-    if(PICC_IsNewCardPresent()) {
+
+    if (PICC_IsNewCardPresent()) {
         printf("Card selected!\n");
         PICC_ReadCardSerial(uid_ptr);
         printf("UID size: 0x%02X\n", uid.size);
         printf("UID sak: 0x%02X\n", uid.sak);
         printf("Card UID: ");
-        
-        for (byte i=0; i<uid.size; i++) {
+
+        for (byte i = 0; i < uid.size; i++) {
             printf("%02X", uid.uidByte[i]);
         }
-        
+
         printf_P(PSTR("\n"));
     } else {
         printf_P((PSTR("No card detected!\n")));
@@ -91,78 +92,72 @@ void read_card(void)
 }
 
 void add_card(const char *const *argv)
-{   
-
+{
     int is_found = 0;
 
-    if(PICC_IsNewCardPresent()) {
-        
+    if (PICC_IsNewCardPresent()) {
         if (head != NULL) {
-        
             card_t *current;
             current = head;
-            
             int number = 1;
-            
+
             while (current != NULL && is_found == 0) {
                 uint8_t *uid = current->uid;
                 Uid card_uid;
                 Uid *uid_ptra = &card_uid;
                 PICC_ReadCardSerial(uid_ptra);
-                
-                if(!memcmp(current->name, argv[1], (strlen(current->name) + 1)) || !memcmp(card_uid.uidByte, current->uid, card_uid.size)){
-                    
+
+                if (!memcmp(current->name, argv[1], (strlen(current->name) + 1)) ||
+                        !memcmp(card_uid.uidByte, current->uid, card_uid.size)) {
                     is_found = 1;
-                    
                     printf("%d. ", number);
-                    
-                    for (byte i=0; i<current->size; i++) {
+
+                    for (byte i = 0; i < current->size; i++) {
                         printf("%02X", uid[i]);
                     }
-                    
+
                     printf(" %s", current->name);
                 }
-                
+
                 current = current->next;
                 number++;
             }
         }
-        
-        
-        if (is_found == 0) {  
+
+        if (is_found == 0) {
             card_t *new_card;
             Uid uid;
             Uid *uid_ptr = &uid;
-            
             new_card = malloc(sizeof(card_t));
             PICC_ReadCardSerial(uid_ptr);
             memcpy(&(new_card->size), &(uid.size), 1);
             memcpy(new_card->uid, uid.uidByte, uid.size);
-        
-        
-            new_card->name = malloc(strlen(argv[1])+1);
-            
-            if(new_card == NULL || new_card->uid == NULL || new_card->name == NULL) {
+            new_card->name = malloc(strlen(argv[1]) + 1);
+
+            if (new_card == NULL || new_card->uid == NULL || new_card->name == NULL) {
                 printf_P(PSTR("Not enough memory. Please remove any of the cards added."));
             }
-            
+
             strcpy(new_card->name, argv[1]);
             new_card->next = NULL;
-            
-            if(head != NULL) {
+
+            if (head != NULL) {
                 card_t *current;
                 current = head;
+
                 while (current->next != NULL) {
                     current = current->next;
                 }
+
                 current->next = new_card;
             } else {
                 head = new_card;
             }
         }
-    } else if (is_found == 0){
+    } else if (is_found == 0) {
         printf_P(PSTR("No card detected!"));
     }
+
     printf_P(PSTR("\n"));
 }
 
@@ -173,34 +168,39 @@ void remove_card(const char *const *argv)
     current = head;
     previous = head;
     int in_list = 0;
+
     while (current != NULL) {
-        if (current == head && current->next == NULL && !memcmp(current->name, argv[1], (strlen(current->name)+1))) {
+        if (current == head && current->next == NULL &&
+                !memcmp(current->name, argv[1], (strlen(current->name) + 1))) {
             head = NULL;
             free(current->name);
             free(current);
             current = NULL;
             previous = NULL;
             in_list = 1;
-        } else if (current == head && current->next != NULL && !memcmp(current->name, argv[1], (strlen(current->name)+1))){
+        } else if (current == head && current->next != NULL &&
+                   !memcmp(current->name, argv[1], (strlen(current->name) + 1))) {
             head = current-> next;
             free(current->name);
             free(current);
             current = head;
             previous = head;
             in_list = 1;
-        } else if (current->next != NULL && !memcmp(current->name, argv[1], (strlen(current->name)+1))) {
+        } else if (current->next != NULL &&
+                   !memcmp(current->name, argv[1], (strlen(current->name) + 1))) {
             previous->next = current->next;
             free(current->name);
             free(current);
             current = previous->next;
             in_list = 1;
-        } else if (current->next == NULL  && !memcmp(current->name, argv[1], (strlen(current->name)+1))) {
+        } else if (current->next == NULL  &&
+                   !memcmp(current->name, argv[1], (strlen(current->name) + 1))) {
             previous->next = NULL;
             free(current->name);
             free(current);
             current = NULL;
             in_list = 1;
-        } else if (current->next != NULL){
+        } else if (current->next != NULL) {
             previous = current;
             current = current->next;
         } else {
@@ -208,9 +208,11 @@ void remove_card(const char *const *argv)
             current = NULL;
         }
     }
+
     if (in_list == 0) {
         printf("No card with that name!");
     }
+
     printf_P(PSTR("\n"));
 }
 
@@ -222,26 +224,31 @@ void list_cards(void)
         int number = 1;
         card_t *current;
         current = head;
+
         while (current->next != NULL) {
             printf("%d. ", number);
             uint8_t *uid = current->uid;
-            for (byte i=0; i<current->size; i++) {
+
+            for (byte i = 0; i < current->size; i++) {
                 printf("%02X", uid[i]);
-                
             }
+
             printf(" %s", current->name);
             current = current->next;
             number++;
             printf_P(PSTR("\n"));
         }
+
         printf("%d. ", number);
         uint8_t *uid = current->uid;
-           for (byte i=0; i<current->size; i++) {
-               printf("%02X", uid[i]);
-           }
-           printf(" %s", current->name);
-        
+
+        for (byte i = 0; i < current->size; i++) {
+            printf("%02X", uid[i]);
+        }
+
+        printf(" %s", current->name);
     }
+
     printf_P(PSTR("\n"));
 }
 
