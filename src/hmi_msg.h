@@ -17,7 +17,6 @@
 #define CON_ARGUMENTS   "To few or to many arguments for this command\nUse <help>\n"
 #define CON_CMD_IMPL    "Implemented commands:\n"
 #define ACCESS          "ACCESS DENIED!"
-#define UART_STATUS_MASK 0xFF
 
 extern PGM_P const months[];
 

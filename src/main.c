@@ -11,14 +11,29 @@
 #include "../lib/helius_microrl/microrl.h"
 #include "cli_microrl.h"
 #include <util/atomic.h>
+#include "../lib/matejx_avr_lib/mfrc522.h"
+#include "rfid.h"
 
 #define UART_STATUS_MASK 0x00FF
 #define BAUD 9600
 
+
 volatile uint32_t time;
+
+int in_list;
+int done;
+
 //microrl object and pointer creation
 microrl_t rl;
 microrl_t *prl = &rl;
+
+static inline void init_rfid_reader(void)
+{
+    /* Init RFID-RC522 */
+    MFRC522_init();
+    PCD_Init();
+}
+
 
 static inline void clock(void)
 {
@@ -45,6 +60,8 @@ static inline void hw_init()
     sei();
     stdout = &uart0_io;
     stdin = &uart0_io;
+        fprintf_P(stdout,
+              PSTR(STUD_NAME"\n"));
     fprintf_P(stdout,
               PSTR(CONSOLE_HELP1));
     fprintf_P(stdout, PSTR(CONSOLE_HELP2));
@@ -88,16 +105,94 @@ static inline void heartbeat()
     }
 }
 
+
+//checks if rfid card is in contact
+void check(void)
+{   
+    //known card contact var
+    static uint32_t since_allowed;
+    
+    //unknown card contact var
+    static uint32_t since_blocked;
+    
+    //card contact var
+    if(PICC_IsNewCardPresent()) {
+        
+        /* Kind of a same as in_list, but with smaller scope (needed, when illegit card is in contact while door is open */
+        int found = 0;
+        
+        /* In case we have cards in list */
+        if (head != NULL) {
+        
+            card_t *current;
+            current = head;
+            
+            
+            /* Iteration through the list */
+            while (current != NULL) {
+            
+                Uid card_uid;
+                Uid *uid_ptra = &card_uid;
+                PICC_ReadCardSerial(uid_ptra);
+                
+                /* In case the card in list examined is the same in contact. */
+                if(!memcmp(card_uid.uidByte, current->uid, card_uid.size)){
+                    
+                    in_list = 1;
+                    PORTA |= _BV(PORTA1);
+                    since_allowed = time;
+                    lcd_clrscr();
+                    lcd_puts_P(PSTR(STUD_NAME));
+                    lcd_goto(0x40);
+                    lcd_puts(current->name);
+                    done = 0;
+                    found = 1;
+                }
+                current = current->next;
+            }
+        }
+        
+        /* In case we have no cards in list or we have no match */
+        if (head == NULL || found == 0) {
+            in_list = 0;
+            PORTA &= ~_BV(PORTA1);
+            since_blocked = time;
+            lcd_clrscr();
+            lcd_puts_P(PSTR(STUD_NAME));
+            lcd_goto(0x40);
+            lcd_puts_P(PSTR(ACCESS));
+            done = 0;
+        }
+        
+        /* Extending a local scope variable to global scope variable */
+        in_list = found;
+    }
+    
+    if(in_list == 1 && (time-since_allowed)<3) {
+        PORTA |= _BV(PORTA1);
+    } else {
+        PORTA &= ~_BV(PORTA1);
+    }        
+    
+    if (((time-since_blocked)>=7) && ((time-since_allowed)>=7) && done == 0) {
+        lcd_clrscr();
+        lcd_puts_P(PSTR(STUD_NAME));
+        done = 1;
+    }
+}
+
 //main method
 int main (void)
 {
+    init_rfid_reader();
     hw_init();
     print_startup();
     print_version();
-
+    done = 1;
     while (1) {
         heartbeat();
         microrl_insert_char(prl, (uart0_getc() & UART_STATUS_MASK));
+         check();
     }
 }
 

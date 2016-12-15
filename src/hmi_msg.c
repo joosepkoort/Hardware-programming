@@ -1,5 +1,5 @@
 #include <avr/pgmspace.h>
-
+#include "hmi_msg.h"
 const char jan[] PROGMEM = "January";
 const char feb[] PROGMEM = "February";
 const char mar[] PROGMEM = "March";
