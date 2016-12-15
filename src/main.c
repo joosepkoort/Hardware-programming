@@ -50,6 +50,7 @@ static inline void hw_init()
 {
     //pin3 PORTA väljund
     DDRA |= _BV(DDA3);
+    DDRA |= _BV(DDA1);
     // Init UART3
     uart3_init(UART_BAUD_SELECT(BAUD, F_CPU));
     stderr = &uart3_out;
