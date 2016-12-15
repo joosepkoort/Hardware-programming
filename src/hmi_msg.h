@@ -1,3 +1,4 @@
+#include <avr/pgmspace.h>
 #ifndef _HMI_MSG_H_
 #define _HMI_MSG_H_
 
@@ -15,6 +16,8 @@
 #define CON_IMPLEMENTED "Command not implemented.\n Use <help> to get help.\n"
 #define CON_ARGUMENTS   "To few or to many arguments for this command\nUse <help>\n"
 #define CON_CMD_IMPL    "Implemented commands:\n"
+#define ACCESS          "ACCESS DENIED!"
+#define UART_STATUS_MASK 0xFF
 
 extern PGM_P const months[];
 
