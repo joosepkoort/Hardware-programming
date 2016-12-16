@@ -68,6 +68,7 @@ void cli_print(const char * str)
     fprintf(stdout, "%s", str);
 }
 
+
 void read_card(void)
 {
     Uid uid;
@@ -90,6 +91,7 @@ void read_card(void)
         printf_P((PSTR("No card detected!\n")));
     }
 }
+
 
 void add_card(const char *const *argv)
 {
@@ -161,6 +163,7 @@ void add_card(const char *const *argv)
     printf_P(PSTR("\n"));
 }
 
+
 void remove_card(const char *const *argv)
 {
     card_t *current;
@@ -215,6 +218,7 @@ void remove_card(const char *const *argv)
 
     printf_P(PSTR("\n"));
 }
+
 
 void list_cards(void)
 {
@@ -303,7 +307,7 @@ void cli_handle_month(const char *const *argv)
         if (!strncmp_P(argv[1], (PGM_P)pgm_read_word(&months[i]),
                        strlen(argv[1]))) {
             fprintf_P(stdout, (PGM_P)pgm_read_word(&months[i]));
-            printf("\n\r");
+            printf("\n");
             lcd_puts_P((PGM_P)pgm_read_word(&months[i]));
             lcd_goto(0x48);
         }

@@ -61,8 +61,10 @@ static inline void hw_init()
     sei();
     stdout = &uart0_io;
     stdin = &uart0_io;
+    //prints student name
     fprintf_P(stdout,
               PSTR(STUD_NAME"\n"));
+    //prints console help
     fprintf_P(stdout,
               PSTR(CONSOLE_HELP1));
     fprintf_P(stdout, PSTR(CONSOLE_HELP2));
@@ -115,23 +117,23 @@ void check(void)
     //unknown card contact var
     static uint32_t since_blocked;
 
-    //card contact var
+    //card contact variable
     if (PICC_IsNewCardPresent()) {
-        /* Kind of a same as in_list, but with smaller scope (needed, when illegit card is in contact while door is open */
+        //similar to in_list
         int found = 0;
 
-        /* In case we have cards in list */
+        //if card in list
         if (head != NULL) {
             card_t *current;
             current = head;
 
-            /* Iteration through the list */
+            //looping through list
             while (current != NULL) {
                 Uid card_uid;
                 Uid *uid_ptra = &card_uid;
                 PICC_ReadCardSerial(uid_ptra);
 
-                /* In case the card in list examined is the same in contact. */
+                // if card being examined is the same as the card in contact
                 if (!memcmp(card_uid.uidByte, current->uid, card_uid.size)) {
                     in_list = 1;
                     PORTA |= _BV(PORTA1);
@@ -148,7 +150,7 @@ void check(void)
             }
         }
 
-        /* In case we have no cards in list or we have no match */
+        //if there are no cards in list or no match
         if (head == NULL || found == 0) {
             in_list = 0;
             PORTA &= ~_BV(PORTA1);
@@ -160,7 +162,6 @@ void check(void)
             done = 0;
         }
 
-        /* Extending a local scope variable to global scope variable */
         in_list = found;
     }
 
